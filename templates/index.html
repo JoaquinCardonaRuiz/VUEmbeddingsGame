@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask App</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .grid-container {
+            width: 600px; /* Set your desired width */
+            height: 400px; /* Set your desired height */
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 80px;
+            justify-content: center;
+            align-items: center;
+        }
+        .grid-container div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+    <script>
+        function handleSubmit(event, textboxId) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                var textbox = document.getElementById(textboxId);
+                var inputValue = textbox.value;
+                // Send the data to the server
+                fetch('/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({textboxId: inputValue, 'textBoxID': textbox.id})
+                })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+</head>
+<body>
+    <div class="grid-container">
+        {% for label in labels %}
+            <div>
+                {% if loop.index != 5 %}
+                    <input type="text" class="textfield" id="textbox{{ loop.index }}" onkeydown="handleSubmit(event, 'textbox{{ loop.index }}')">
+                    <label">{{ label }}</label>
+                {% else %}
+                    <label style="font-size:xx-large;">{{ label }}</label>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</body>
