@@ -162,5 +162,5 @@ class Game():
             self.score += 10
             return True
         else:
-            print(f'Incorrect!, your guess was {textbox_data}, but the answer was {self.neighbours[textbox_id]['word_string']}')
+            print(f'Incorrect!, your guess was {textbox_data}, but the answer was {self.neighbours[textbox_id]["word_string"]}')
             return False
