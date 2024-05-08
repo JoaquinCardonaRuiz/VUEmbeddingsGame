@@ -25,7 +25,7 @@ class Game():
             {
                 'word_id': i,
                 'word_string' : f'Neighbour {i}',
-                'show_string': f'{self.start_text.split(' ')[i]}',
+                'show_string': f'{self.start_text.split(" ")[i]}',
                 'hint': "",
                 'len': len(f'Neighbour {i}'),
                 'locked': False
