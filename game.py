@@ -8,6 +8,8 @@ import random
 class Game():
     def __init__(self):
         self.nounlist, self.coords, self.word_data, self.hints = self.load_files()
+        self.nounlist = self.nounlist[:100]
+        self.coords = self.coords[:100]
         self.filtered_words = [1741,3139,1812,1937,3399,3558,4081]
         self.num_words = len(self.nounlist)
         self.state = "not_started"
@@ -19,7 +21,8 @@ class Game():
                 'word_string' : f'Neighbour {i}',
                 'show_string': f'{self.start_text.split(' ')[i]}',
                 'hint': "",
-                'len': len(f'Neighbour {i}')
+                'len': len(f'Neighbour {i}'),
+                'blocked': False
             } for i in range(8)]
 
     def load_files(self):
@@ -86,12 +89,17 @@ class Game():
         if selected_word:
             if selected_word in self.targets:
                 self.targets_hit += 1
-                score += (100 * self.targets_hit)
+                self.score += (100 * self.targets_hit)
+                attempts = 0
                 while True:
+                    attempts += 1
                     new_target = random.randint(0, self.num_words-1)
-                    if new_target not in self.targets and new_target not in self.guessed_words:
+                    if new_target not in self.targets and new_target not in self.guessed_words or attempts > 100:
                         break
-                self.targets[self.targets.index(selected_word)] = new_target
+                if attempts > 100:
+                    self.targets.remove(selected_word)
+                else:
+                    self.targets[self.targets.index(selected_word)] = new_target
 
         closest_indices = find_closest_indices(self.coords, self.selected_word, 9)[1:]
         for i in range(8):
@@ -99,6 +107,7 @@ class Game():
             self.neighbours[i]['word_string'] = self.nounlist[closest_indices[i]]
             self.neighbours[i]['show_string'] = len(self.nounlist[closest_indices[i]]) * '_ '
             self.neighbours[i]['len'] = len(self.nounlist[closest_indices[i]])
+            self.neighbours[i]['blocked'] = self.neighbours[i]['word_id'] in self.guessed_words
         self.get_hints()
 
     
