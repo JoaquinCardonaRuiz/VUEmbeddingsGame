@@ -1,8 +1,8 @@
 import json
 from wiktionaryparser import WiktionaryParser
 
-word_file = open('wordlist.txt','r')
-nounlist = word_file.read().split('\n')[:-1]
+with open('wordlist.txt','r') as word_file:
+    nounlist = word_file.read().split('\n')[:-1]
 parser = WiktionaryParser()
 
 num_words = len(nounlist)

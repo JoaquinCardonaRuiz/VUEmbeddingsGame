@@ -24,40 +24,138 @@
             flex-direction: column;
             align-items: center;
         }
+        .correct-answer {
+            border: 1px solid green;
+            background-color: lightgreen;
+        }
+
+        .incorrect-answer {
+            border: 1px solid red;
+            background-color: lightcoral;
+        }
     </style>
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+</head>
+<body>
     <script>
         function handleSubmit(event, textboxId) {
             if (event.keyCode === 13) {
                 event.preventDefault();
                 var textbox = document.getElementById(textboxId);
                 var inputValue = textbox.value;
-                // Send the data to the server
-                fetch('/', {
+                var textboxNumber = textboxId.replace('textbox', '');
+                fetch('/check-answer', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({textboxId: inputValue, 'textBoxID': textbox.id})
+                    body: JSON.stringify({ textboxNumber: parseInt(textboxNumber), content: inputValue })
                 })
                 .then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {
+                    console.log(data);
+                    if (data.is_correct) {
+                        // Apply correct answer styles
+                        textbox.classList.add('correct-answer');
+                        // Delay for 1 second before reloading the page
+                        setTimeout(() => {
+                            fetch('/play-game')
+                                .then(response => {
+                                    if (response.ok) {
+                                        console.log("Page reloaded successfully");
+                                        window.location.reload(); // Reload the page
+                                    } else {
+                                        console.error('Error:', response.statusText);
+                                    }
+                                })
+                                .catch(error => console.error('Error:', error));
+                        }, 250);
+                    } else {
+                        // Apply incorrect answer styles
+                        textbox.classList.add('incorrect-answer');
+                        // Delay for 1 second before clearing the input
+                        setTimeout(() => {
+                            textbox.value = ''; // Clear the input
+                            textbox.classList.remove('incorrect-answer'); // Remove the incorrect-answer class
+                        }, 250);
+                    }
+                })
                 .catch(error => console.error('Error:', error));
             }
         }
     </script>
-    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
-</head>
-<body>
-    <div class="grid-container">
-        {% for label in labels %}
-            <div>
-                {% if loop.index != 5 %}
-                    <input type="text" class="textfield" id="textbox{{ loop.index }}" onkeydown="handleSubmit(event, 'textbox{{ loop.index }}')">
-                    <label">{{ label }}</label>
-                {% else %}
-                    <label style="font-size:xx-large;">{{ label }}</label>
-                {% endif %}
-            </div>
-        {% endfor %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var countdownElement = document.getElementById('countdown');
+            var timeLeft = "{{ game_data.time }}";
+            
+            // Function to update the timer
+            function updateTimer() {
+                countdownElement.textContent = timeLeft + 's';
+                timeLeft--;
+                if (timeLeft < 0) {
+                    clearInterval(timerInterval);
+                    // Send a POST request to '/timeout'
+                    fetch('/timeout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({}) // You can pass any data if needed
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log("Timeout handled successfully");
+                        } else {
+                            console.error('Error:', response.statusText);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            }
+            
+            // Initial call to update the timer
+            updateTimer();
+            
+            // Update the timer every second
+            var timerInterval = setInterval(updateTimer, 1000);
+        });
+    </script>
+    <div>
+        <label>Welcome to <b>Em8eddings</b>, the game where you navigate embeddings by guessing similar words.<br><br> You will be given <b>one word at the centre</b> of the grid. <b>Guess any of its 8 neighbours</b> with similar embeddings before running out of time. </label>
+        {% if game_data.state=='not_started' %}
+            <label><br><br> Press here to start.</label>
+            <button id="startButton">Start</button>
+        {% endif %}
     </div>
+    {% if game_data.state=='started' %}
+        <div id="timer">Time: <span id="countdown"></span></div>
+    {% endif %}
+    <form autocomplete="off">
+        <div class="grid-container" style="margin-bottom: 150px;">
+            {% for i in range(9) %}
+                <div>
+                    {% if i == 4 %}
+                        <label style="font-size: xx-large;">{{ game_data.selected_word }}</label>
+                    {% elif i < 4 %}
+                        <input placeholder="{{ game_data.neighbours[i].show_string}}" type="text" class="textfield" id="textbox{{ i }}" onkeydown="handleSubmit(event, 'textbox{{ i }}')">
+                        {% if game_data.neighbours[i].hint %}
+                            <label style="font-size: x-small; color:gray">Hint: {{ game_data.neighbours[i].hint}}</label>
+                        {% endif %}
+                    {% else %}
+                        <input placeholder="{{ game_data.neighbours[i-1].show_string}}" type="text" class="textfield" id="textbox{{ i-1 }}" onkeydown="handleSubmit(event, 'textbox{{ i-1 }}')">
+                        {% if game_data.neighbours[i-1].hint %}
+                            <label style="font-size: x-small; color:gray">Hint: {{ game_data.neighbours[i-1].hint}}</label>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </form>
+    <script>
+        document.getElementById("startButton").addEventListener("click", function() {
+            window.location.href = '/play-game';
+        });
+    </script>
 </body>
+</html>
