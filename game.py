@@ -16,7 +16,6 @@ class Game():
     def __init__(self):
         self.nounlist, self.coords, self.word_data, self.hints = self.load_files()
         self.filtered_words = [1741,3139,1812,1937,3399,3558,4081]
-        print([self.nounlist[f_word] for f_word in self.filtered_words])
         self.num_words = len(self.nounlist)
         self.state = "not_started"
         self.start_text = 'Guess the word by its most similar neighbours.'
@@ -115,13 +114,6 @@ class Game():
             self.neighbours[i]['len'] = len(self.nounlist[closest_indices[i]])
             self.neighbours[i]['locked'] = self.neighbours[i]['word_id'] in self.guessed_words
         self.get_hints()
-        if selected_word is not None:
-            print(f'Nouns: {[(i,el) for i,el in enumerate(self.nounlist)]}')
-            print(f'Selected: {self.selected_word}')
-            print(f'Guessed: {self.guessed_words}')
-            print(f'Targets: {self.targets}')
-            print(f'Targets: {[self.nounlist[target] for target in self.targets]}')
-            print('-----------')
 
     
     def get_targets(self):
