@@ -154,9 +154,9 @@
                     {% else %}
                         {% if game_data.neighbours[i-1].blocked %}
                             <input readonly class="readonly-input" placeholder="{{ game_data.neighbours[i-1].word_string}}" type="text" class="textfield" id="textbox{{ i-1 }}" onkeydown="handleSubmit(event, 'textbox{{ i-1 }}')">
+                            <label style="font-size: x-small; color:gray; display: block; margin-top: 5px;">Word already guessed.</label>
                         {% else %}
                             <input placeholder="{{ game_data.neighbours[i-1].show_string}}" type="text" class="textfield" id="textbox{{ i-1 }}" onkeydown="handleSubmit(event, 'textbox{{ i-1 }}')">
-                            <label style="font-size: x-small; color:gray; display: block; margin-top: 5px;">Word already guessed.</label>
                             {% if game_data.neighbours[i-1].hint %}
                                 <label style="font-size: x-small; color:gray; display: block; margin-top: 5px;">Hint: {{ game_data.neighbours[i-1].hint}}</label>
                             {% endif %}
