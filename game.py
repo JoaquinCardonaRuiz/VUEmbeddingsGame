@@ -1,7 +1,5 @@
 import numpy as np
 import json
-import matplotlib.pyplot as plt
-from blessed import Terminal
 import random
 
 def find_closest_indices(indices, target_index, N):
