@@ -1,6 +1,5 @@
 import numpy as np
 import json
-from random import randint
 import matplotlib.pyplot as plt
 from blessed import Terminal
 from math_utils import calculate_octant, find_closest_indices, directions
@@ -47,7 +46,8 @@ class Game():
                 "selected_word": self.nounlist[self.selected_word],
                 "neighbours": self.neighbours,
                 "time": self.get_time(),
-                "score": self.score
+                "score": self.score,
+                "targets": ', '.join([self.nounlist[target] for target in self.targets])
             }
         else:
             return {
@@ -58,27 +58,41 @@ class Game():
             }
 
     def get_time(self):
-        return 15
         if self.rounds_played < 3:
             return 90
         elif self.rounds_played < 6:
             return 60
         elif self.rounds_played < 9:
-            return 30
+            return 45
         else:
-            return 20
+            return 30
 
     def start_game(self):
         self.state = 'started'
         self.rounds_played = 0
         self.score = 0
+        self.targets_hit = 0
+        self.guessed_words = []
         self.select_word()
+        self.get_targets()
         
     def select_word(self, selected_word = None):
         if selected_word:
             self.selected_word = selected_word
         else:
-            self.selected_word = randint(0, self.num_words-1)
+            self.selected_word = random.randint(0, self.num_words-1)
+        self.guessed_words.append(self.selected_word)
+
+        if selected_word:
+            if selected_word in self.targets:
+                self.targets_hit += 1
+                score += (100 * self.targets_hit)
+                while True:
+                    new_target = random.randint(0, self.num_words-1)
+                    if new_target not in self.targets and new_target not in self.guessed_words:
+                        break
+                self.targets[self.targets.index(selected_word)] = new_target
+
         closest_indices = find_closest_indices(self.coords, self.selected_word, 9)[1:]
         for i in range(8):
             self.neighbours[i]['word_id'] = closest_indices[i]
@@ -86,6 +100,14 @@ class Game():
             self.neighbours[i]['show_string'] = len(self.nounlist[closest_indices[i]]) * '_ '
             self.neighbours[i]['len'] = len(self.nounlist[closest_indices[i]])
         self.get_hints()
+
+    
+    def get_targets(self):
+        while True:
+            targets = [random.randint(0, self.num_words-1) for i in range(5)]
+            if self.selected_word not in targets and len(targets) == len(set(targets)):
+                break
+        self.targets = targets
 
 
     def get_hints(self):

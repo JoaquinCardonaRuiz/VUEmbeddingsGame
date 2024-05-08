@@ -9,7 +9,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: "Segoe UI", Helvetica, Arial, sans-serif;
         }
+        
         .grid-container {
             width: 600px; /* Set your desired width */
             height: 400px; /* Set your desired height */
@@ -115,9 +117,12 @@
         });
     </script>
     <div>
-        <label>Welcome to <b>Em8eddings</b>, the game where you navigate embeddings by guessing similar words.<br><br> You will be given <b>one word at the centre</b> of the grid. <b>Guess any of its 8 neighbours</b> with similar embeddings before running out of time. </label>
         {% if game_data.state=='not_started' %}
-        <br><br> Press here to start.  <button id="startButton">Start</button>
+            <label>Welcome to <b>Em8eddings</b>, the game where you navigate embeddings by guessing semantically related words.<br><br> You will be given <b>one word at the centre</b> of the grid. <b>Guess any of its 8 semantic neighbours</b> before running out of time to move it to the centre, and navigate through the embeddings space. </label>
+        {% endif %}
+        <label><br> <b>Tip!</b> Guessed words get blocked off, so playing it safe by going around in circles will lead to fewer options to guess from. Navigate to target words for extra points.</label>
+        {% if game_data.state=='not_started' %}
+        <br> Press here to start.  <button id="startButton">Start</button>
         {% endif %}
     </div>
     {% if game_data.state=='started' %}
@@ -128,7 +133,7 @@
         </div>
     {% endif %}
     <form autocomplete="off">
-        <div class="grid-container" style="margin-bottom: 150px; margin: 0 auto; padding-bottom: 450px;">
+        <div class="grid-container" style="margin-bottom: 150px; margin: 0 auto; padding-bottom: 50px;">
             {% for i in range(9) %}
                 <div style="height: 60px;">
                     {% if i == 4 %}
@@ -148,6 +153,11 @@
             {% endfor %}
         </div>
     </form>
+    {% if game_data.state=='started' %}
+        <div style="margin: 0 auto;">    
+            <label style="font-size: smaller;padding-bottom: 25px;">Target words (find for extra points): <i>{{game_data.targets}}</i></label>
+        </div>
+    {% endif %}
     <script>
         document.getElementById("startButton").addEventListener("click", function() {
             window.location.href = '/play-game';
