@@ -33,6 +33,10 @@
             border: 1px solid red;
             background-color: lightcoral;
         }
+        button {
+            display: inline;
+            vertical-align: middle; /* Optional: Align the button vertically with the label */
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
 </head>
@@ -92,25 +96,14 @@
             // Function to update the timer
             function updateTimer() {
                 countdownElement.textContent = timeLeft + 's';
+                if (timeLeft <= 10) {
+                    countdownElement.style.color = 'red'; // Change color to red when 10 seconds or less remaining
+                }
                 timeLeft--;
                 if (timeLeft < 0) {
                     clearInterval(timerInterval);
-                    // Send a POST request to '/timeout'
-                    fetch('/timeout', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({}) // You can pass any data if needed
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            console.log("Timeout handled successfully");
-                        } else {
-                            console.error('Error:', response.statusText);
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
+                    // Redirect to '/timeout'
+                    window.location.href = '/timeout';
                 }
             }
             
@@ -124,28 +117,31 @@
     <div>
         <label>Welcome to <b>Em8eddings</b>, the game where you navigate embeddings by guessing similar words.<br><br> You will be given <b>one word at the centre</b> of the grid. <b>Guess any of its 8 neighbours</b> with similar embeddings before running out of time. </label>
         {% if game_data.state=='not_started' %}
-            <label><br><br> Press here to start.</label>
-            <button id="startButton">Start</button>
+        <br><br> Press here to start.  <button id="startButton">Start</button>
         {% endif %}
     </div>
     {% if game_data.state=='started' %}
-        <div id="timer">Time: <span id="countdown"></span></div>
+        <div id="timer" style="font-size: larger;">
+            <b>Time: <span id="countdown"></span></b>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <!-- Add spacing between the timer and score -->
+            <b>Score: {{ game_data.score }}</b> <!-- Display the score -->
+        </div>
     {% endif %}
     <form autocomplete="off">
-        <div class="grid-container" style="margin-bottom: 150px;">
+        <div class="grid-container" style="margin-bottom: 150px; margin: 0 auto; padding-bottom: 450px;">
             {% for i in range(9) %}
-                <div>
+                <div style="height: 60px;">
                     {% if i == 4 %}
                         <label style="font-size: xx-large;">{{ game_data.selected_word }}</label>
                     {% elif i < 4 %}
                         <input placeholder="{{ game_data.neighbours[i].show_string}}" type="text" class="textfield" id="textbox{{ i }}" onkeydown="handleSubmit(event, 'textbox{{ i }}')">
                         {% if game_data.neighbours[i].hint %}
-                            <label style="font-size: x-small; color:gray">Hint: {{ game_data.neighbours[i].hint}}</label>
+                            <label style="font-size: x-small; color:gray; display: block; margin-top: 5px;">Hint: {{ game_data.neighbours[i].hint}}</label>
                         {% endif %}
                     {% else %}
                         <input placeholder="{{ game_data.neighbours[i-1].show_string}}" type="text" class="textfield" id="textbox{{ i-1 }}" onkeydown="handleSubmit(event, 'textbox{{ i-1 }}')">
                         {% if game_data.neighbours[i-1].hint %}
-                            <label style="font-size: x-small; color:gray">Hint: {{ game_data.neighbours[i-1].hint}}</label>
+                            <label style="font-size: x-small; color:gray; display: block; margin-top: 5px;">Hint: {{ game_data.neighbours[i-1].hint}}</label>
                         {% endif %}
                     {% endif %}
                 </div>

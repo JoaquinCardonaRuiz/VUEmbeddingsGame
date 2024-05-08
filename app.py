@@ -48,8 +48,10 @@ def check_answer():
         return jsonify(is_correct=is_correct)
 
 
-if __name__ == '__main__':
-    app.run(debug=True)    
+@app.route('/timeout', methods=['GET'])
+def timeout():
+    game_data = game_instance.get_gamedata()
+    return render_template('timeout.html', game_data=game_data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True)    

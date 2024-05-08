@@ -46,18 +46,32 @@ class Game():
                 "state": self.state,
                 "selected_word": self.nounlist[self.selected_word],
                 "neighbours": self.neighbours,
-                "time": 30
+                "time": self.get_time(),
+                "score": self.score
             }
         else:
             return {
                 "state": self.state,
                 "selected_word": "Em8eddings",
                 "neighbours": self.neighbours,
-                "time": 30
+                "time": 0
             }
+
+    def get_time(self):
+        return 15
+        if self.rounds_played < 3:
+            return 90
+        elif self.rounds_played < 6:
+            return 60
+        elif self.rounds_played < 9:
+            return 30
+        else:
+            return 20
 
     def start_game(self):
         self.state = 'started'
+        self.rounds_played = 0
+        self.score = 0
         self.select_word()
         
     def select_word(self, selected_word = None):
@@ -100,10 +114,9 @@ class Game():
         if self.neighbours[textbox_id]['word_string'] == textbox_data:
             print('Correct Guess')
             self.select_word(self.neighbours[textbox_id]['word_id'])
+            self.rounds_played += 1
+            self.score += 10
             return True
         else:
             print(f'Incorrect!, your guess was {textbox_data}, but the answer was {self.neighbours[textbox_id]['word_string']}')
             return False
-
-    def timeout(self):
-        pass
