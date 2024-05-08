@@ -1,0 +1,11 @@
+I am creating a game based around NLP and embeddings.
+
+The player will be presented with a word, and empty textboxes for 8 other words that are similar in meaning, as chosen by proximity of their embeddings.
+Their task is to type one of these similar words, based on hints. I need you to generate the hints for these words.
+You should take into account that the players will be educated on linguistics, so the examples should be difficult.
+Keep both hints at less than 30 words each. Please don't output any text other than the form given.
+
+The word you need to generate hints for is: "{word}". Please fill the form below. DON'T MENTION THE WORD ITSELF IN THE HINTS.
+
+Medium difficulty hint: <write your hint here>
+Hard difficulty hint: <write your hint here>

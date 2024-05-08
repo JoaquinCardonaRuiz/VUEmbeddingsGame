@@ -2,15 +2,23 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 from blessed import Terminal
-from math_utils import calculate_octant, find_closest_indices, directions
 import random
+
+def find_closest_indices(indices, target_index, N):
+    # Extract coordinates of target_index
+    target_coords = indices[target_index]
+    # Compute distances between target_index and all other indices
+    distances = np.linalg.norm(indices - target_coords, axis=1)
+    # Sort indices based on distances and get the N closest ones
+    closest_indices = distances.argsort()[:N]
+    return closest_indices
+
 
 class Game():
     def __init__(self):
         self.nounlist, self.coords, self.word_data, self.hints = self.load_files()
-        self.nounlist = self.nounlist[:100]
-        self.coords = self.coords[:100]
         self.filtered_words = [1741,3139,1812,1937,3399,3558,4081]
+        print([self.nounlist[f_word] for f_word in self.filtered_words])
         self.num_words = len(self.nounlist)
         self.state = "not_started"
         self.start_text = 'Guess the word by its most similar neighbours.'
@@ -22,14 +30,14 @@ class Game():
                 'show_string': f'{self.start_text.split(' ')[i]}',
                 'hint': "",
                 'len': len(f'Neighbour {i}'),
-                'blocked': False
+                'locked': False
             } for i in range(8)]
 
     def load_files(self):
-        coords_file = open('filtered_embeddings.txt','r')
-        word_file = open('wordlist.txt','r')
-        word_data_file = open('word_data.json','r')
-        hints_file = open('hints.json','r')
+        coords_file = open('data/filtered_embeddings.txt','r')
+        word_file = open('data/wordlist.txt','r')
+        word_data_file = open('data/word_data.json','r')
+        hints_file = open('data/hints.json','r')
         word_data = json.load(word_data_file)
         hints = json.load(hints_file)
         nounlist = word_file.read().split('\n')[:-1]
@@ -80,13 +88,13 @@ class Game():
         self.get_targets()
         
     def select_word(self, selected_word = None):
-        if selected_word:
+        if selected_word is not None:
             self.selected_word = selected_word
         else:
             self.selected_word = random.randint(0, self.num_words-1)
         self.guessed_words.append(self.selected_word)
 
-        if selected_word:
+        if selected_word is not None:
             if selected_word in self.targets:
                 self.targets_hit += 1
                 self.score += (100 * self.targets_hit)
@@ -107,8 +115,15 @@ class Game():
             self.neighbours[i]['word_string'] = self.nounlist[closest_indices[i]]
             self.neighbours[i]['show_string'] = len(self.nounlist[closest_indices[i]]) * '_ '
             self.neighbours[i]['len'] = len(self.nounlist[closest_indices[i]])
-            self.neighbours[i]['blocked'] = self.neighbours[i]['word_id'] in self.guessed_words
+            self.neighbours[i]['locked'] = self.neighbours[i]['word_id'] in self.guessed_words
         self.get_hints()
+        if selected_word is not None:
+            print(f'Nouns: {[(i,el) for i,el in enumerate(self.nounlist)]}')
+            print(f'Selected: {self.selected_word}')
+            print(f'Guessed: {self.guessed_words}')
+            print(f'Targets: {self.targets}')
+            print(f'Targets: {[self.nounlist[target] for target in self.targets]}')
+            print('-----------')
 
     
     def get_targets(self):
